@@ -1,44 +1,27 @@
-import { ActorSystem } from "@yingyeothon/actor-system";
-import { RedisQueue, RedisLock } from "@yingyeothon/actor-system-redis-support";
 import {
-  shiftToNextLambda,
-  handleActorLambdaEvent
+  handleActorLambdaEvent,
+  shiftToNextLambda
 } from "@yingyeothon/actor-system-aws-lambda-support";
-// import { S3Repository } from '@yingyeothon/repository-s3';
-import { RedisRepository } from "@yingyeothon/repository-redis";
 import { ConsoleLogger } from "@yingyeothon/logger";
-import IORedis from "ioredis";
+// import { S3Repository } from '@yingyeothon/repository-s3';
 import * as el from "./elapsed";
+import external from "./external";
 import {
-  IRankDocument,
-  insertOrUpdateRank,
-  IRankRecord,
+  fetchMyRank,
   fetchRanks,
   fetchUserRank,
-  fetchMyRank
+  insertOrUpdateRank,
+  IRankDocument,
+  IRankRecord
 } from "./rank";
-import { IRepository } from "@yingyeothon/repository";
 
-const redis = new IORedis({
-  host: process.env.REDIS_HOST,
-  password: process.env.REDIS_PASSWORD
-});
 const logger = new ConsoleLogger(!!process.env.DEBUG ? "debug" : "info");
-const sys = new ActorSystem({
-  queue: new RedisQueue({ redis, logger }),
-  lock: new RedisLock({ redis, logger }),
-  logger
-});
+const { getActorSystem, getRepository } = external;
 
 interface IRankMessage {
   user: string;
   score: string;
 }
-
-const getRepository = (): IRepository =>
-  new RedisRepository({ redis, prefix: "leaderboard:" });
-// Don't use S3 as a repository until writing all of tests for this and throttling this by API Gateway settings.
-// new S3Repository({ bucketName: process.env.BUCKET_NAME });
 
 const onRankPayload = (serviceKey: string) => async ({
   message: { user, score }
@@ -56,7 +39,7 @@ const onRankPayload = (serviceKey: string) => async ({
 };
 
 const getRankActor = (serviceKey: string) =>
-  sys.spawn<IRankMessage>(serviceKey, actor =>
+  getActorSystem().spawn<IRankMessage>(serviceKey, actor =>
     actor
       .on("act", onRankPayload(serviceKey))
       .on("error", console.error)
@@ -132,11 +115,4 @@ export const viewRank = async (
 export const clearRank = async (serviceKey: string) => {
   const repo = getRepository();
   await el.p(`clearRanks`, () => repo.delete(serviceKey));
-};
-
-// Only for terminating tests clearly.
-export const forTest = {
-  statRedis: () => redis.status,
-  connectRedis: () => redis.connect(),
-  closeRedis: () => redis.disconnect()
 };

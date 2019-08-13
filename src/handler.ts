@@ -1,8 +1,8 @@
-import { APIGatewayProxyHandler, APIGatewayProxyEvent } from "aws-lambda";
-import "source-map-support/register";
-import { viewRank, updateRank, clearRank } from "./actor";
-import { compareScore } from "./score";
 import { ConsoleLogger } from "@yingyeothon/logger";
+import { APIGatewayProxyEvent, APIGatewayProxyHandler } from "aws-lambda";
+import "source-map-support/register";
+import { clearRank, updateRank, viewRank } from "./actor";
+import { compareScore } from "./score";
 export { bottomHalf } from "./actor";
 
 const logger = new ConsoleLogger(`info`);

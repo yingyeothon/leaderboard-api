@@ -1,3 +1,4 @@
+import { ConsoleLogger } from "@yingyeothon/logger";
 import {
   compareNumbers,
   numbersEqual,
@@ -5,7 +6,6 @@ import {
   scoreToNumbers
 } from "./score";
 import { reverse } from "./utils";
-import { ConsoleLogger } from "@yingyeothon/logger";
 
 export interface IRankDocument {
   scores: number[][];
@@ -232,7 +232,7 @@ const fetchUserSameRanks = (
       reverse(users)
         .filter(each => each !== user)
         .slice(0, count)
-        .map(each => ({ rank, user: each, score: score } as IRankRecord))
+        .map(each => ({ rank, user: each, score } as IRankRecord))
     );
   }
   return records;

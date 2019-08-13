@@ -84,7 +84,7 @@ test("skip-update", () => {
 
 test("correct-topn-near", () => {
   const count = 100;
-  let doc: any = undefined;
+  let doc: any;
   for (let index = 1; index <= count; ++index) {
     doc = rank.insertOrUpdateRank(doc, `user${index}`, index.toString());
   }
@@ -110,7 +110,7 @@ test("correct-topn-near", () => {
 
 test("correct-topn-near-same-rank", () => {
   const count = 100;
-  let doc: any = undefined;
+  let doc: any;
   for (let index = 1; index <= count; ++index) {
     doc = rank.insertOrUpdateRank(
       doc,

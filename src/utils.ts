@@ -23,7 +23,7 @@ export const arrayCompare = <T>(
 export const arrayEquals = <T>(
   a: T[],
   b: T[],
-  eq: (a: T, b: T) => boolean = (a, b) => a === b
+  eq: (a: T, b: T) => boolean = (x, y) => x === y
 ) =>
   !!a &&
   !!b &&

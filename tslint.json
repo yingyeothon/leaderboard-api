@@ -1,0 +1,10 @@
+{
+  "extends": ["tslint:recommended", "tslint-config-prettier"],
+  "rules": {
+    "object-literal-sort-keys": false,
+    "no-console": false
+  },
+  "linterOptions": {
+    "exclude": ["node_modules/**/*.ts", ".webpack/**/*.js", "webpack.config.js"]
+  }
+}

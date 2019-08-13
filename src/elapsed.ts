@@ -1,5 +1,5 @@
-import timespan from "time-span";
 import { ConsoleLogger, LogSeverity } from "@yingyeothon/logger";
+import timespan from "time-span";
 
 const logger = new ConsoleLogger(
   !!process.env.DEBUG || !!process.env.ELAPSED ? `debug` : `info`

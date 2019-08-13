@@ -1,6 +1,6 @@
+import { LogSeverity } from "@yingyeothon/logger";
 import * as actor from "../src/actor";
 import * as el from "../src/elapsed";
-import { LogSeverity } from "@yingyeothon/logger";
 
 let oldEnv: { [name: string]: string };
 let oldSeverity: LogSeverity;
@@ -20,7 +20,6 @@ beforeAll(() => {
 });
 
 afterAll(() => {
-  actor.forTest.closeRedis();
   process.env = oldEnv;
   el.forTest.changeLogSeverity(oldSeverity);
 });
