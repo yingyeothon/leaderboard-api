@@ -1,5 +1,8 @@
 # Leaderboard API
 
+[![LoC](https://tokei.rs/b1/github/yingyeothon/leaderboard-api)](https://github.com/yingyeothon/leaderboard-api)
+[![Build Status](https://travis-ci.org/yingyeothon/leaderboard-api.svg?branch=master)](https://travis-ci.org/yingyeothon/leaderboard-api)
+
 Simple Serverless Leaderboard API.
 
 ## Quickstart
