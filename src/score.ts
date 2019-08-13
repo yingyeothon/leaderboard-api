@@ -1,6 +1,6 @@
 import { arrayCompare, arrayEquals, reverse } from "./utils";
 
-const maxPrecisionLength = 10;
+const maxPrecisionLength = 14; // Math.floor(Math.log10(Number.MAX_SAFE_INTEGER)) - 1
 
 export const scoreToNumbers = (score: string) => {
   const numbers: number[] = [];

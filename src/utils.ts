@@ -25,7 +25,7 @@ export const arrayEquals = <T>(
   b: T[],
   eq: (a: T, b: T) => boolean = (a, b) => a === b
 ) =>
-  a &&
-  b &&
+  !!a &&
+  !!b &&
   a.length === b.length &&
   a.every((value, index) => eq(value, b[index]));

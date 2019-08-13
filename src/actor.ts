@@ -7,7 +7,7 @@ import {
 // import { S3Repository } from '@yingyeothon/repository-s3';
 import { RedisRepository } from "@yingyeothon/repository-redis";
 import { ConsoleLogger } from "@yingyeothon/logger";
-import * as IORedis from "ioredis";
+import IORedis from "ioredis";
 import * as el from "./elapsed";
 import {
   IRankDocument,
@@ -23,7 +23,7 @@ const redis = new IORedis({
   host: process.env.REDIS_HOST,
   password: process.env.REDIS_PASSWORD
 });
-const logger = new ConsoleLogger("debug");
+const logger = new ConsoleLogger(!!process.env.DEBUG ? "debug" : "info");
 const sys = new ActorSystem({
   queue: new RedisQueue({ redis, logger }),
   lock: new RedisLock({ redis, logger }),
@@ -125,11 +125,18 @@ export const viewRank = async (
   const me = el.n(`fetchMy`, () => fetchMyRank(doc, user));
 
   const view: IRankView = { top, context, me };
-  console.log(`viewRank`, view);
+  logger.debug(`viewRank`, view);
   return view;
 };
 
 export const clearRank = async (serviceKey: string) => {
   const repo = getRepository();
   await el.p(`clearRanks`, () => repo.delete(serviceKey));
+};
+
+// Only for terminating tests clearly.
+export const forTest = {
+  statRedis: () => redis.status,
+  connectRedis: () => redis.connect(),
+  closeRedis: () => redis.disconnect()
 };

@@ -5,6 +5,8 @@
   "main": "src/handler.ts",
   "scripts": {
     "start": "sls offline",
+    "build": "sls package",
+    "test": "jest",
     "deploy": "sls deploy",
     "debug": "SLS_DEBUG=* node --inspect ./node_modules/.bin/serverless offline -s dev"
   },
@@ -22,10 +24,13 @@
   "devDependencies": {
     "@types/aws-lambda": "^8.10.31",
     "@types/ioredis": "^4.0.14",
+    "@types/jest": "^24.0.17",
     "@types/node": "10",
+    "jest": "^24.8.0",
     "serverless": "^1.49.0",
     "serverless-offline": "^5.10.1",
     "serverless-webpack": "^5.3.1",
+    "ts-jest": "^24.0.2",
     "ts-loader": "^6.0.4",
     "typescript": "^3.5.3",
     "webpack": "^4.39.1"

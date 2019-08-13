@@ -5,6 +5,7 @@ import {
   scoreToNumbers
 } from "./score";
 import { reverse } from "./utils";
+import { ConsoleLogger } from "@yingyeothon/logger";
 
 export interface IRankDocument {
   scores: number[][];
@@ -17,6 +18,8 @@ export interface IRankRecord {
   user: string;
   score: string;
 }
+
+const logger = new ConsoleLogger(!!process.env.DEBUG ? `debug` : `info`);
 
 const lowerBound = <T>(
   values: T[],
@@ -44,7 +47,7 @@ export const insertOrUpdateRank = (
 ) => {
   const doc = ensureDocument(maybeDoc);
   if (!isHigherThanOld(doc, user, scoreOfStringFormat)) {
-    console.log(
+    logger.debug(
       `insertOrUpdateRank`,
       `skipLowScore`,
       user,
@@ -63,7 +66,7 @@ export const insertOrUpdateRank = (
     score,
     (a, b) => compareNumbers(b, a) // Descending order.
   );
-  console.log(`insertOrUpdateRank`, doc, `current`, currentIndex);
+  logger.debug(`insertOrUpdateRank`, doc, `current`, currentIndex);
 
   if (numbersEqual(doc.scores[currentIndex], score)) {
     // If a score already exists.
@@ -161,16 +164,17 @@ export const fetchUserRank = (
     console.error(`No ranked user`, user);
     return [];
   }
-  console.log(`fetchUserRank`, `document`, doc);
+  logger.debug(`fetchUserRank`, `document`, doc);
 
   const upper = fetchUserUpperRanks(doc, user, contextMargin);
+  const me = fetchMyRank(doc, user);
   const same = fetchUserSameRanks(doc, user, contextMargin);
   const lower = fetchUserLowerRanks(doc, user, contextMargin - same.length);
-  console.log(`fetchUserRank`, `upper`, upper);
-  console.log(`fetchUserRank`, `same`, same);
-  console.log(`fetchUserRank`, `lower`, lower);
+  logger.debug(`fetchUserRank`, `upper`, upper);
+  logger.debug(`fetchUserRank`, `same`, same);
+  logger.debug(`fetchUserRank`, `lower`, lower);
 
-  return [upper, same, lower].reduce((a, b) => a.concat(b), []);
+  return [upper, [me], same, lower].reduce((a, b) => a.concat(b), []);
 };
 
 const fetchUserUpperRanks = (
@@ -220,7 +224,7 @@ const fetchUserSameRanks = (
   const index = doc.userIndex[user];
   const score = numbersToScore(doc.scores[index]);
   const rank = index + 1;
-  const records: IRankRecord[] = [fetchMyRank(doc, user)];
+  const records: IRankRecord[] = [];
   {
     const users = doc.users[index];
     Array.prototype.push.apply(
