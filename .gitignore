@@ -10,3 +10,7 @@ jspm_packages
 
 # Environment variables
 .envrc
+
+# Coveralls
+coverage
+
