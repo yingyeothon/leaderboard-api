@@ -93,7 +93,7 @@ $ curl -XPUT "https://API-DOMAIN/STAGE/service_id/period" -H "X-User: test" -d "
 For admin purpose, it supports `CLEAR` command via `DELETE` request.
 
 ```bash
-curl -XPUT "https://API-DOMAIN/STAGE/service_id/period" -H "X-Auth: admin-secret"
+curl -XDELETE "https://API-DOMAIN/STAGE/service_id/period" -H "X-Auth: admin-secret"
 ```
 
 But if `process.env.AUTH` isn't set while deploying, `X-Auth` can be omitted and it can lead very horrible problem, that is resetting all of ranks by anonymous.
