@@ -36,8 +36,9 @@ interface IRankMessage {
 }
 
 const getRepository = (): IRepository =>
-  //  new S3Repository({ bucketName: process.env.BUCKET_NAME });
   new RedisRepository({ redis, prefix: "leaderboard:" });
+// Don't use S3 as a repository until writing all of tests for this and throttling this by API Gateway settings.
+// new S3Repository({ bucketName: process.env.BUCKET_NAME });
 
 const onRankPayload = (serviceKey: string) => async ({
   message: { user, score }
