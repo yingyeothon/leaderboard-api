@@ -64,7 +64,7 @@ class TestExternal implements IExternal {
 }
 
 const external =
-  process.env.NODE_ENV === "test"
+  process.env.NODE_ENV === "test" && process.env.EXTERNAL !== "production"
     ? new TestExternal()
     : new ProductionExternal();
 export default external;

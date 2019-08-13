@@ -1,4 +1,4 @@
-import { ConsoleLogger, LogSeverity } from "@yingyeothon/logger";
+import { ConsoleLogger } from "@yingyeothon/logger";
 import timespan from "time-span";
 
 const logger = new ConsoleLogger(
@@ -30,10 +30,4 @@ export const p = async <R>(
     logger.debug(`Elapsed[${name}]`, span(), `withError`, error);
     throw error;
   }
-};
-
-// Only for test logging.
-export const forTest = {
-  logSeverity: () => logger.severity,
-  changeLogSeverity: (value: LogSeverity) => (logger.severity = value)
 };

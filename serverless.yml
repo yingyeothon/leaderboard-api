@@ -31,6 +31,7 @@ provider:
     REDIS_HOST: ${env:REDIS_HOST}
     REDIS_PASSWORD: ${env:REDIS_PASSWORD}
     BOTTOM_HALF_LAMBDA: ${self:service.name}-${self:provider.stage}-bottomHalf
+    ELAPSED: "1"
 
 functions:
   get:

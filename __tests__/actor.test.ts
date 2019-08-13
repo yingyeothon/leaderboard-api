@@ -1,28 +1,4 @@
-import { LogSeverity } from "@yingyeothon/logger";
 import * as actor from "../src/actor";
-import * as el from "../src/elapsed";
-
-let oldEnv: { [name: string]: string };
-let oldSeverity: LogSeverity;
-beforeAll(() => {
-  // Setup test profile.
-  oldEnv = { ...(process.env || {}) };
-
-  // There is no Redis in Travis environment,
-  // in that case, use the outer one.
-  if (!process.env.TRAVIS_BRANCH) {
-    process.env.REDIS_HOST = "localhost";
-    process.env.REDIS_PASSWORD = "";
-  }
-
-  oldSeverity = el.forTest.logSeverity();
-  el.forTest.changeLogSeverity("error");
-});
-
-afterAll(() => {
-  process.env = oldEnv;
-  el.forTest.changeLogSeverity(oldSeverity);
-});
 
 beforeEach(async () => {
   await actor.clearRank(serviceKey);
