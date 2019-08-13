@@ -7,8 +7,13 @@ let oldSeverity: LogSeverity;
 beforeAll(() => {
   // Setup test profile.
   oldEnv = { ...(process.env || {}) };
-  process.env.REDIS_HOST = "localhost";
-  process.env.REDIS_PASSWORD = "";
+
+  // There is no Redis in Travis environment,
+  // in that case, use the outer one.
+  if (!process.env.TRAVIS_BRANCH) {
+    process.env.REDIS_HOST = "localhost";
+    process.env.REDIS_PASSWORD = "";
+  }
 
   oldSeverity = el.forTest.logSeverity();
   el.forTest.changeLogSeverity("error");
