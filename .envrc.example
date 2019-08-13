@@ -1,0 +1,4 @@
+export REDIS_HOST="your-redis-server"
+export REDIS_PASSWORD=""
+
+export BUCKET_NAME="your-score-bucket"

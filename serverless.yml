@@ -1,0 +1,67 @@
+service:
+  name: yyt-leaderboard-api
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: production
+  region: ap-northeast-2
+  tracing:
+    apiGateway: true
+    lambda: true
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:GetObject"
+        - "s3:PutObject"
+        - "s3:HeadObject"
+      Resource:
+        - "arn:aws:s3:::${env:BUCKET_NAME}/*"
+    - Effect: "Allow"
+      Action:
+        - "s3:ListBucket"
+      Resource:
+        - "arn:aws:s3:::${env:BUCKET_NAME}"
+  environment:
+    BUCKET_NAME: ${env:BUCKET_NAME}
+    REDIS_HOST: ${env:REDIS_HOST}
+    REDIS_PASSWORD: ${env:REDIS_PASSWORD}
+    BOTTOM_HALF_LAMBDA: ${self:service.name}-${self:provider.stage}-bottomHalf
+
+functions:
+  get:
+    handler: src/handler.get
+    events:
+      - http:
+          method: get
+          path: /{serviceId}/{period}
+          cors: true
+  put:
+    handler: src/handler.put
+    timeout: 6
+    events:
+      - http:
+          method: put
+          path: /{serviceId}/{period}
+          cors: true
+  bottomHalf:
+    handler: src/handler.bottomHalf
+    timeout: 900
+  clear:
+    handler: src/handler.clear
+    events:
+      - http:
+          method: delete
+          path: /{serviceId}/{period}
+          cors: true
+
+resources:
+  Resources:
+    DistBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${env:BUCKET_NAME}
