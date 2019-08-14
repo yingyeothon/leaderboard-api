@@ -2,6 +2,7 @@
 
 [![LoC](https://tokei.rs/b1/github/yingyeothon/leaderboard-api)](https://github.com/yingyeothon/leaderboard-api)
 [![Build Status](https://travis-ci.org/yingyeothon/leaderboard-api.svg?branch=master)](https://travis-ci.org/yingyeothon/leaderboard-api)
+[![Coverage Status](https://coveralls.io/repos/github/yingyeothon/leaderboard-api/badge.svg?branch=master)](https://coveralls.io/github/yingyeothon/leaderboard-api?branch=master)
 
 Simple Serverless Leaderboard API.
 
