@@ -11,14 +11,16 @@ const prepareRequest = (event: APIGatewayProxyEvent) => {
   if (!serviceId || !period) {
     throw new Error(`Not Found`);
   }
-  const user = event.headers["x-user"];
-  if (!user) {
-    throw new Error(`Unauthorized`);
-  }
   const queryParams = event.queryStringParameters;
   return {
     serviceKey: [serviceId, period].join("/"),
-    user,
+    user: () => {
+      const user = event.headers["x-user"];
+      if (!user) {
+        throw new Error(`Unauthorized`);
+      }
+      return user;
+    },
     cursor: () => safeStringQueryParam(queryParams, "cursor"),
     offset: () => safeIntQueryParam(queryParams, "offset"),
     limit: () => safeIntQueryParam(queryParams, "limit", { maxValue: 100 })
@@ -29,21 +31,19 @@ const handleFetch = (
   fetch: (
     args: {
       repository: IRankRepository;
-      user: string;
     } & ReturnType<typeof prepareRequest>
   ) => any
 ): APIGatewayProxyHandler => async (event: APIGatewayProxyEvent) => {
   const parameters = prepareRequest(event);
-  const { serviceKey, user } = parameters;
-  logger.info(`me`, serviceKey, user);
+  const { serviceKey } = parameters;
   try {
     const repository = await getRankRepository(serviceKey);
     return {
       statusCode: 200,
-      body: JSON.stringify(fetch({ ...parameters, repository, user }))
+      body: JSON.stringify(fetch({ ...parameters, repository }))
     };
   } catch (error) {
-    logger.error(`get`, serviceKey, user, error);
+    logger.error(`get`, serviceKey, error);
     return { statusCode: 400, body: "Bad Request" };
   }
 };
@@ -51,13 +51,13 @@ const handleFetch = (
 export const get: APIGatewayProxyHandler = handleFetch(
   ({ repository, user, limit }) => ({
     top: repository.top(0, limit()),
-    me: repository.me(user),
-    around: repository.around(user, limit())
+    me: repository.me(user()),
+    around: repository.around(user(), limit())
   })
 );
 
 export const me: APIGatewayProxyHandler = handleFetch(({ repository, user }) =>
-  repository.me(user)
+  repository.me(user())
 );
 
 export const top: APIGatewayProxyHandler = handleFetch(
@@ -65,7 +65,7 @@ export const top: APIGatewayProxyHandler = handleFetch(
 );
 
 export const around: APIGatewayProxyHandler = handleFetch(
-  ({ repository, user, limit }) => repository.around(user, limit())
+  ({ repository, user, limit }) => repository.around(user(), limit())
 );
 
 export const scrollUp: APIGatewayProxyHandler = handleFetch(
@@ -83,10 +83,10 @@ export const put: APIGatewayProxyHandler = async event => {
   logger.info(`put`, serviceKey, user, score);
 
   try {
-    const updated = await requestToUpdateRank(serviceKey, user, score);
+    const updated = await requestToUpdateRank(serviceKey, user(), score);
     logger.info(`put`, `completion`, serviceKey, user, score, updated);
 
-    const myRank = (await getRankRepository(serviceKey)).me(user);
+    const myRank = (await getRankRepository(serviceKey)).me(user());
     return { statusCode: 200, body: JSON.stringify(myRank) };
   } catch (error) {
     logger.error(`put`, serviceKey, event.body, error);
