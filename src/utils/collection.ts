@@ -29,3 +29,22 @@ export const arrayEquals = <T>(
   !!b &&
   a.length === b.length &&
   a.every((value, index) => eq(value, b[index]));
+
+export const lowerBound = <T>(
+  values: T[],
+  target: T,
+  compare: (a: T, b: T) => number
+): number => {
+  let left = 0;
+  let right = values.length;
+  while (left + 1 <= right) {
+    const mid = left + Math.floor((right - left) / 2);
+    const compared = compare(values[mid], target);
+    if (compared < 0) {
+      left = mid + 1;
+    } else {
+      right = mid;
+    }
+  }
+  return left;
+};

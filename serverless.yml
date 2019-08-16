@@ -27,11 +27,13 @@ provider:
       Resource:
         - "arn:aws:s3:::${env:BUCKET_NAME}"
   environment:
-    BUCKET_NAME: ${env:BUCKET_NAME}
     REDIS_HOST: ${env:REDIS_HOST}
     REDIS_PASSWORD: ${env:REDIS_PASSWORD}
+    BUCKET_NAME: ${env:BUCKET_NAME}
+    AUTH_KEY: ${env:AUTH_KEY}
     BOTTOM_HALF_LAMBDA: ${self:service.name}-${self:provider.stage}-bottomHalf
-    ELAPSED: "1"
+    DEBUG: ${env:DEBUG, ""}
+    ELAPSED: ${env:ELAPSED, "1"}
 
 functions:
   get:
@@ -40,6 +42,41 @@ functions:
       - http:
           method: get
           path: /{serviceId}/{period}
+          cors: true
+  me:
+    handler: src/handler.me
+    events:
+      - http:
+          method: get
+          path: /{serviceId}/{period}/me
+          cors: true
+  top:
+    handler: src/handler.top
+    events:
+      - http:
+          method: get
+          path: /{serviceId}/{period}/top
+          cors: true
+  around:
+    handler: src/handler.around
+    events:
+      - http:
+          method: get
+          path: /{serviceId}/{period}/around
+          cors: true
+  scrollUp:
+    handler: src/handler.scrollUp
+    events:
+      - http:
+          method: get
+          path: /{serviceId}/{period}/up
+          cors: true
+  scrollDown:
+    handler: src/handler.scrollDown
+    events:
+      - http:
+          method: get
+          path: /{serviceId}/{period}/down
           cors: true
   put:
     handler: src/handler.put
