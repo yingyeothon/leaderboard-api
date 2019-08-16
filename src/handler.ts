@@ -23,7 +23,11 @@ const prepareRequest = (event: APIGatewayProxyEvent) => {
     },
     cursor: () => safeStringQueryParam(queryParams, "cursor"),
     offset: () => safeIntQueryParam(queryParams, "offset"),
-    limit: () => safeIntQueryParam(queryParams, "limit", { maxValue: 100 })
+    limit: () =>
+      safeIntQueryParam(queryParams, "limit", {
+        maxValue: 100,
+        defaultValue: 10
+      })
   };
 };
 
@@ -79,10 +83,10 @@ export const scrollDown: APIGatewayProxyHandler = handleFetch(
 
 export const put: APIGatewayProxyHandler = async event => {
   const { serviceKey, user } = prepareRequest(event);
-  const score = event.body.trim();
-  logger.info(`put`, serviceKey, user, score);
-
   try {
+    const score = (event.body || "").trim();
+    logger.info(`put`, serviceKey, user, score);
+
     const updated = await requestToUpdateRank(serviceKey, user(), score);
     logger.info(`put`, `completion`, serviceKey, user, score, updated);
 
