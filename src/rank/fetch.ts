@@ -84,7 +84,7 @@ export const scrollUpRanks = elapsed(
     );
     return highers
       .concat(sameButNewers)
-      .slice(highers.length + sameButNewers.length - limit);
+      .slice(Math.max(0, highers.length + sameButNewers.length - limit));
   }
 );
 

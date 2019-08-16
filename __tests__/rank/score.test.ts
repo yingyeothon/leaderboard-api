@@ -7,6 +7,15 @@ import {
 } from "../../src/rank/score";
 import { lowerBound } from "../../src/utils/collection";
 
+test("zero-length", () => {
+  const input = "0";
+  const numbers = scoreToNumbers(input);
+  expect(numbers).toEqual([0]);
+
+  const actual = numbersToScore(numbers);
+  expect(actual).toEqual(input);
+});
+
 test("short-length", () => {
   const input = "123";
   const numbers = scoreToNumbers(input);

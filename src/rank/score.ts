@@ -20,7 +20,7 @@ export const numbersToScore = (numbers: number[]) =>
       )
     )
     .join("")
-    .replace(/^0+/, "");
+    .replace(/^0+/, "") || "0";
 
 export const compareNumbers = (a: number[], b: number[]) =>
   a.length < b.length

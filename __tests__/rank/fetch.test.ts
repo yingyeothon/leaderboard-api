@@ -156,6 +156,30 @@ test("scroll-with-same-rank", () => {
   expect(down).toEqual(generate(30, 49));
 });
 
+test("scroll-begin", () => {
+  const generate = (fromUserId: number = 1, toUserId: number = 10) =>
+    generateRanks(fromUserId, toUserId, 10, 3);
+  const doc = insertMany(emptyDocument(), ...reverse(generate()));
+  expect(scrollUpRanks(doc, `user7`, 1)).toEqual(generate(8, 8));
+  expect(scrollUpRanks(doc, `user7`, 2)).toEqual(generate(8, 9));
+  expect(scrollUpRanks(doc, `user7`, 3)).toEqual(generate(8, 10));
+  expect(scrollUpRanks(doc, `user7`, 4)).toEqual(generate(8, 10));
+  expect(scrollUpRanks(doc, `user7`, 5)).toEqual(generate(8, 10));
+  expect(scrollUpRanks(doc, `user7`, 6)).toEqual(generate(8, 10));
+});
+
+test("scroll-end", () => {
+  const generate = (fromUserId: number = 1, toUserId: number = 10) =>
+    generateRanks(fromUserId, toUserId, 10, 3);
+  const doc = insertMany(emptyDocument(), ...reverse(generate()));
+  expect(scrollDownRanks(doc, `user4`, 1)).toEqual(generate(3, 3));
+  expect(scrollDownRanks(doc, `user4`, 2)).toEqual(generate(2, 3));
+  expect(scrollDownRanks(doc, `user4`, 3)).toEqual(generate(1, 3));
+  expect(scrollDownRanks(doc, `user4`, 4)).toEqual(generate(1, 3));
+  expect(scrollDownRanks(doc, `user4`, 5)).toEqual(generate(1, 3));
+  expect(scrollDownRanks(doc, `user4`, 6)).toEqual(generate(1, 3));
+});
+
 test("unexpected", () => {
   expect(fetchMyRank(emptyDocument(), `unknown`)).toBeUndefined();
   expect(fetchUserAroundRanks(emptyDocument(), `unknown`, -1)).toEqual([]);
