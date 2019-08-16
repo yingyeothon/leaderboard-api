@@ -25,8 +25,8 @@ export const getRedis = mem(() => {
 export const getActorSystem = mem(() =>
   envars.external.production
     ? new ActorSystem({
-        queue: new RedisQueue({ redis: this.getRedis(), logger }),
-        lock: new RedisLock({ redis: this.getRedis(), logger }),
+        queue: new RedisQueue({ redis: getRedis(), logger }),
+        lock: new RedisLock({ redis: getRedis(), logger }),
         logger
       })
     : new ActorSystem({
@@ -40,6 +40,6 @@ export const getRepository = mem(() =>
   envars.external.production
     ? // Don't use S3 as a repository until writing all of tests for this and throttling this by API Gateway settings.
       // new S3Repository({ bucketName: process.env.BUCKET_NAME });
-      new RedisRepository({ redis: this.getRedis(), prefix: "leaderboard:" })
+      new RedisRepository({ redis: getRedis(), prefix: "leaderboard:" })
     : new InMemoryRepository()
 );
