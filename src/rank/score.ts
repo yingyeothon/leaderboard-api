@@ -1,4 +1,4 @@
-import { arrayCompare, arrayEquals, reverse } from "./utils";
+import { arrayCompare, arrayEquals, reverse } from "../utils/collection";
 
 const maxPrecisionLength = 14; // Math.floor(Math.log10(Number.MAX_SAFE_INTEGER)) - 1
 
@@ -20,10 +20,16 @@ export const numbersToScore = (numbers: number[]) =>
       )
     )
     .join("")
-    .replace(/^0+/, "");
+    .replace(/^0+/, "") || "0";
 
 export const compareNumbers = (a: number[], b: number[]) =>
-  arrayCompare(a, b, (x, y) => x - y);
+  a.length < b.length
+    ? -1
+    : a.length > b.length
+    ? 1
+    : arrayCompare(reverse(a), reverse(b), (x, y) =>
+        x > y ? 1 : x < y ? -1 : 0
+      );
 
 export const numbersEqual = (a: number[], b: number[]) => arrayEquals(a, b);
 

@@ -4,13 +4,21 @@
 [![Build Status](https://travis-ci.org/yingyeothon/leaderboard-api.svg?branch=master)](https://travis-ci.org/yingyeothon/leaderboard-api)
 [![Coverage Status](https://coveralls.io/repos/github/yingyeothon/leaderboard-api/badge.svg?branch=master)](https://coveralls.io/github/yingyeothon/leaderboard-api?branch=master)
 
-Simple Serverless Leaderboard API.
+Simple Serverless Leaderboard API. It uses
 
-## Quickstart
+- `AWS API Gateway` and `AWS Lambda` to serve this Web API with Serverless model.
+- `Redis` to control the concurrent updates on the same ranking document.
+- `S3` to store it as permanently.
+
+Since you are using `Redis`, strictly speaking, this is not Serverless. This dependency will be removed in the future by implementing the web-based state management for `ActorSystem`'s concurrency control.
+
+## Documentation
 
 ### GET
 
-Request `GET` to `/{serviceId}/{period}` with a header `X-User` for `userId`, then it returns by this form.
+#### Get all
+
+Request `GET` to `/{serviceId}/{period}?limit=<number>` with a header `X-User` for `userId`, then it returns by this form.
 
 ```typescript
 interface IRankRecord {
@@ -19,15 +27,15 @@ interface IRankRecord {
   score: string;
 }
 interface IRankView {
+  me: IRankRecord;
   top: IRankRecord[];
-  context: IRankRecord[];
-  me: IRankRecord[];
+  around: IRankRecord[];
 }
 ```
 
-- `context` means some `record`s near my rank.
+- `around` means some `record`s near my rank which contains my rank, too.
 - `score` should be `string` because its value is bigger than `Number.MAX_SAFE_INTEGER`.
-- `me` and `context` field can be omitted when there is no my record.
+- `me` and `around` field can be `undefined` when there is no my record.
 
 ```bash
 $ curl "https://API-DOMAIN/STAGE/service_id/period" -H "X-User: test"
@@ -40,7 +48,7 @@ $ curl "https://API-DOMAIN/STAGE/service_id/period" -H "X-User: test"
     },
     ...
   ],
-  "context": [
+  "around": [
     ...,
     {
       "rank": 321,
@@ -57,38 +65,73 @@ $ curl "https://API-DOMAIN/STAGE/service_id/period" -H "X-User: test"
 }
 ```
 
+#### Get `me` only
+
+Request `GET` to `/{serviceId}/{period}/me` with a header `X-User` for `userId`.
+
+```bash
+$ curl "https://API-DOMAIN/STAGE/service_id/period/me" -H "X-User: test"
+{
+  "rank": 321,
+  "user": "test",
+  "score": "123456789123456789"
+}
+```
+
+#### Get `top` with `offset` and `limit`
+
+Request `GET` to `/{serviceId}/{period}/top?offset=<number>&limit=<number>`.
+
+```bash
+$ curl "https://API-DOMAIN/STAGE/service_id/period/top?offset=0&limit=10"
+[{
+  "rank": 1,
+  "user": "test",
+  "score": "123456789123456789"
+}, ...]
+```
+
+#### Get `around` with `limit`
+
+Request `GET` to `/{serviceId}/{period}/around?limit=<number>` with a header `X-User` for `userId`.
+
+```bash
+$ curl "https://API-DOMAIN/STAGE/service_id/period/around?limit=10" -H "X-User: test"
+[..., {
+  "rank": 321,
+  "user": "test",
+  "score": "123456789123456789"
+}, ...]
+```
+
+#### Scrolling from the result
+
+If you want to see more rankings from the current result, please request `GET` to `/{serviceId}/{period}/{direction}?cursor=<user>&limit=<number>` where `direction` is one of `up` and `down`.
+
+For example, if we want to see more 10 higher rankings from the `test` user, it should request to `/{serviceId}/{period}/up?cursor=test&limit=10`. This is because this `user` field should be unique.
+
+```bash
+$ curl "https://API-DOMAIN/STAGE/service_id/period/up?limit=10"
+[..., {
+  "rank": 320,
+  "user": "test2",
+  "score": "123456789123456799"
+}]
+```
+
 ### PUT
 
-Request `PUT` to `/{serviceId}/{period}` with a header `X-User` for `userId`, then it returns by the form that is same with `GET` API. The type of payload for `score` is `string` because it can be bigger than `Number.MAX_SAFE_INTEGER`.
+Request `PUT` to `/{serviceId}/{period}` with a header `X-User` for `userId`, then it returns by the form that is same with `GET my` API. The type of payload for `score` is `string` because it can be bigger than `Number.MAX_SAFE_INTEGER`.
 
-- This API doesn't update a record when an old score is higher than a new score.
+- **This API doesn't update a record when an old score is higher than a new score.**
 - This API can be slow if there is so many concurrent `PUT` calls. It is because it is on the actor model to manage the consistency of ranks whiel updating concurrently.
 
 ```bash
 $ curl -XPUT "https://API-DOMAIN/STAGE/service_id/period" -H "X-User: test" -d "123456789123456789"
 {
-  "top": [
-    {
-      "rank": 321,
-      "user": "test",
-      "score": "123456789123456789"
-    },
-    ...
-  ],
-  "context": [
-    ...,
-    {
-      "rank": 321,
-      "user": "test",
-      "score": "123456789123456789"
-    },
-    ...
-  ],
-  "my": {
-    "rank": 321,
-    "user": "test",
-    "score": "123456789123456789"
-  },
+  "rank": 321,
+  "user": "test",
+  "score": "123456789123456789"
 }
 ```
 

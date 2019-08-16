@@ -1,95 +1,101 @@
-import { ConsoleLogger } from "@yingyeothon/logger";
 import { APIGatewayProxyEvent, APIGatewayProxyHandler } from "aws-lambda";
 import "source-map-support/register";
-import { clearRank, updateRank, viewRank } from "./actor";
-import { compareScore } from "./score";
+import { requestToUpdateRank } from "./actor";
+import { getRankRepository, IRankRepository } from "./rank";
+import logger from "./system/logger";
+import { safeIntQueryParam, safeStringQueryParam } from "./utils/request";
 export { bottomHalf } from "./actor";
 
-const logger = new ConsoleLogger(`info`);
-
-const viewParams = (event: APIGatewayProxyEvent) => ({
-  topN: +((event.queryStringParameters || {}).topN || "10"),
-  contextMargin: +((event.queryStringParameters || {}).contextMargin || "5")
-});
-
-const sleep = (millis: number) =>
-  new Promise<void>(resolve => setTimeout(resolve, millis));
-
-export const get: APIGatewayProxyHandler = async event => {
+const prepareRequest = (event: APIGatewayProxyEvent) => {
   const { serviceId, period } = event.pathParameters;
   if (!serviceId || !period) {
-    return { statusCode: 404, body: "Not Found" };
+    throw new Error(`Not Found`);
   }
-  const user = event.headers["x-user"];
-  if (!user) {
-    return { statusCode: 401, body: "Unauthorized" };
-  }
+  const queryParams = event.queryStringParameters;
+  return {
+    serviceKey: [serviceId, period].join("/"),
+    user: () => {
+      const user = event.headers["x-user"];
+      if (!user) {
+        throw new Error(`Unauthorized`);
+      }
+      return user;
+    },
+    cursor: () => safeStringQueryParam(queryParams, "cursor"),
+    offset: () => safeIntQueryParam(queryParams, "offset"),
+    limit: () =>
+      safeIntQueryParam(queryParams, "limit", {
+        maxValue: 100,
+        defaultValue: 10
+      })
+  };
+};
 
-  const serviceKey = [serviceId, period].join("/");
-  const { topN, contextMargin } = viewParams(event);
-  logger.info(`get`, serviceKey, user, topN, contextMargin);
+const handleFetch = (
+  fetch: (
+    args: {
+      repository: IRankRepository;
+    } & ReturnType<typeof prepareRequest>
+  ) => any
+): APIGatewayProxyHandler => async (event: APIGatewayProxyEvent) => {
+  const parameters = prepareRequest(event);
+  const { serviceKey } = parameters;
   try {
-    const view = await viewRank(serviceKey, user, topN, contextMargin);
-    return { statusCode: 200, body: JSON.stringify(view) };
+    const repository = await getRankRepository(serviceKey);
+    return {
+      statusCode: 200,
+      body: JSON.stringify(fetch({ ...parameters, repository }))
+    };
   } catch (error) {
-    logger.error(`get`, serviceKey, user, error);
+    logger.error(`get`, serviceKey, error);
     return { statusCode: 400, body: "Bad Request" };
   }
 };
 
-export const put: APIGatewayProxyHandler = async event => {
-  const { serviceId, period } = event.pathParameters;
-  if (!serviceId || !period) {
-    return { statusCode: 404, body: "Not Found" };
-  }
-  const user = event.headers["x-user"];
-  if (!user) {
-    return { statusCode: 401, body: "Unauthorized" };
-  }
-  const serviceKey = [serviceId, period].join("/");
-  const score = event.body.trim();
-  logger.info(`put`, serviceKey, user, score);
+export const get: APIGatewayProxyHandler = handleFetch(
+  ({ repository, user, limit }) => ({
+    top: repository.top(0, limit()),
+    me: repository.me(user()),
+    around: repository.around(user(), limit())
+  })
+);
 
+export const me: APIGatewayProxyHandler = handleFetch(({ repository, user }) =>
+  repository.me(user())
+);
+
+export const top: APIGatewayProxyHandler = handleFetch(
+  ({ repository, offset, limit }) => repository.top(offset(), limit())
+);
+
+export const around: APIGatewayProxyHandler = handleFetch(
+  ({ repository, user, limit }) => repository.around(user(), limit())
+);
+
+export const scrollUp: APIGatewayProxyHandler = handleFetch(
+  ({ repository, cursor, limit }) => repository.scroll(cursor(), "up", limit())
+);
+
+export const scrollDown: APIGatewayProxyHandler = handleFetch(
+  ({ repository, cursor, limit }) =>
+    repository.scroll(cursor(), "down", limit())
+);
+
+export const put: APIGatewayProxyHandler = async event => {
+  const { serviceKey, user } = prepareRequest(event);
   try {
-    await updateRank(serviceKey, user, score);
+    const score = (event.body || "").trim();
+    logger.info(`put`, serviceKey, user, score);
+
+    const updated = await requestToUpdateRank(serviceKey, user(), score);
+    logger.info(`put`, `completion`, serviceKey, user, score, updated);
+
+    const myRank = (await getRankRepository(serviceKey)).me(user());
+    return { statusCode: 200, body: JSON.stringify(myRank) };
   } catch (error) {
     logger.error(`put`, serviceKey, event.body, error);
     return { statusCode: 400, body: "Bad Request" };
   }
-
-  const { topN, contextMargin } = viewParams(event);
-  const view = await viewRankUntilUpdated(
-    serviceKey,
-    user,
-    score,
-    topN,
-    contextMargin
-  );
-  return { statusCode: 200, body: JSON.stringify(view) };
-};
-
-const viewRankUntilUpdated = async (
-  serviceKey: string,
-  user: string,
-  score: string,
-  topN: number,
-  contextMargin: number
-) => {
-  for (let index = 0; index < 10; ++index) {
-    logger.info(`loadRanks-afterPut[${index}]`, serviceKey, user, score);
-    const view = await viewRank(serviceKey, user, topN, contextMargin);
-
-    const userInView = view.context.find(each => each.user === user);
-    logger.info(`loadRanks-afterPut`, `checkUser`, user, score, userInView);
-
-    // Accept only if a new score is higher than old one.
-    if (userInView && compareScore(userInView.score, score) >= 0) {
-      return view;
-    }
-    await sleep(100);
-  }
-  logger.error(`loadRanks-afterPut`, `timeout`, serviceKey, user);
-  return viewRank(serviceKey, user, topN, contextMargin);
 };
 
 export const clear: APIGatewayProxyHandler = async event => {
@@ -104,7 +110,7 @@ export const clear: APIGatewayProxyHandler = async event => {
   const serviceKey = [serviceId, period].join("/");
   logger.info(`clear`, serviceKey);
   try {
-    await clearRank(serviceKey);
+    (await getRankRepository(serviceKey)).truncate();
     return { statusCode: 200, body: "OK" };
   } catch (error) {
     logger.error(`clear`, serviceKey, error);
