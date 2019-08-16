@@ -30,7 +30,7 @@ provider:
     REDIS_HOST: ${env:REDIS_HOST}
     REDIS_PASSWORD: ${env:REDIS_PASSWORD}
     BUCKET_NAME: ${env:BUCKET_NAME}
-    AUTH_KEY: ${env:AUTH_KEY}
+    AUTH_KEY: ${env:AUTH_KEY, ""}
     BOTTOM_HALF_LAMBDA: ${self:service.name}-${self:provider.stage}-bottomHalf
     DEBUG: ${env:DEBUG, ""}
     ELAPSED: ${env:ELAPSED, "1"}
