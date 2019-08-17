@@ -124,7 +124,7 @@ $ curl "https://API-DOMAIN/STAGE/service_id/period/up?limit=10"
 Request `PUT` to `/{serviceId}/{period}` with a header `X-User` for `userId`, then it returns by the form that is same with `GET my` API. The type of payload for `score` is `string` because it can be bigger than `Number.MAX_SAFE_INTEGER`.
 
 - **This API doesn't update a record when an old score is higher than a new score.**
-- This API can be slow if there is so many concurrent `PUT` calls. It is because it is on the actor model to manage the consistency of ranks whiel updating concurrently.
+- This API can be slow if there is so many concurrent `PUT` calls. It is because it is on the actor model to manage the consistency of ranks whiel updating concurrently. [Please see details in benchmark](benchmark/README.md).
 
 ```bash
 $ curl -XPUT "https://API-DOMAIN/STAGE/service_id/period" -H "X-User: test" -d "123456789123456789"
