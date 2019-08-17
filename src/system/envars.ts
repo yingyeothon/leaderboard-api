@@ -7,8 +7,8 @@ const envars = {
       process.env.NODE_ENV !== "test" || process.env.EXTERNAL === "production"
   },
   logging: {
-    debug: !!process.env.DEBUG,
-    elapsed: !!process.env.ELAPSED
+    debug: process.env.DEBUG === "1",
+    elapsed: process.env.ELAPSED === "1"
   },
   redis: {
     host: process.env.REDIS_HOST!,

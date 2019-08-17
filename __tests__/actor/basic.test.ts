@@ -4,22 +4,20 @@ import { getRankRepository } from "../../src/rank";
 const serviceKey = "__tests__/basic";
 
 beforeEach(async () => {
-  const repository = await getRankRepository(serviceKey);
-  await repository.truncate();
+  await getRankRepository(serviceKey).truncate();
 });
 
 afterEach(async () => {
-  const repository = await getRankRepository(serviceKey);
-  await repository.truncate();
+  await getRankRepository(serviceKey).truncate();
 });
 
 test("simple", async () => {
   const user = "user1";
   const score = "123456789123456789123456789";
+
+  const repo = getRankRepository(serviceKey);
   await requestToUpdateRank(serviceKey, user, score);
 
-  const repo = await getRankRepository(serviceKey);
-  await repo.load();
   const myRecord = { rank: 1, user, score };
   expect(repo.top(0, 10)).toEqual([myRecord]);
   expect(repo.around(user, 10)).toEqual([myRecord]);
@@ -31,11 +29,10 @@ test("complex", async () => {
   const record1a = { rank: 1, user: "user1", score: "123456789123456" };
   const record1b = { rank: 2, user: "user2", score: "123456789123453" };
 
+  const repo = getRankRepository(serviceKey);
   await requestToUpdateRank(serviceKey, record1a.user, record1a.score);
   await requestToUpdateRank(serviceKey, record1b.user, record1b.score);
 
-  const repo = await getRankRepository(serviceKey);
-  await repo.load();
   expect(repo.top(0, 10)).toEqual([record1a, record1b]);
   expect(repo.around(record1a.user, 10)).toEqual([record1a, record1b]);
   expect(repo.around(record1b.user, 10)).toEqual([record1a, record1b]);
@@ -51,7 +48,6 @@ test("complex", async () => {
 
   // user1 would not be updated because a new score is lower than old one.
   // user2 would be updated but it is still rank 2.
-  await repo.load();
   expect(repo.top(0, 10)).toEqual([record1a, record2b]);
   expect(repo.around(record2a.user, 10)).toEqual([record1a, record2b]);
   expect(repo.around(record2b.user, 10)).toEqual([record1a, record2b]);
@@ -68,7 +64,6 @@ test("complex", async () => {
 
   // The distance between `user2` and `user3` is "2" so they can't see each other
   // when `limit` is "2".
-  await repo.load();
   expect(repo.top(0, 10)).toEqual([record3c, record3a, record3b]);
   expect(repo.around(record3a.user, 2)).toEqual([record3c, record3a]);
   expect(repo.around(record3b.user, 2)).toEqual([record3a, record3b]);
