@@ -933,30 +933,38 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@yingyeothon/actor-system-aws-lambda-support@^0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@yingyeothon/actor-system-aws-lambda-support/-/actor-system-aws-lambda-support-0.1.4.tgz#b1a274b077e12890ee0ca50e857da145bdccd95e"
-  integrity sha512-WgYKlh0CzDoGwTUgSrFiYlFBmP9ddefCJvTNtmiW/LJQwrHohmwGFiY5+8KVluHM/IEE2Q3q2u4qjG2wkX7jYQ==
+"@yingyeothon/actor-system-aws-lambda-support@^0.1.6":
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/@yingyeothon/actor-system-aws-lambda-support/-/actor-system-aws-lambda-support-0.1.6.tgz#1285551f5c8350a78a1f3f5576856bd7e3f9d0f9"
+  integrity sha512-xMdFLkZ2w/I4OSWbfVxeXuhGXP+Dg1Ok6i2+Z6ntC+lj1fMCWIgXRhK012LCtBoKkkmzTgIO4hA1irhdytHwwg==
   dependencies:
-    "@yingyeothon/actor-system" "^0.1.6"
+    "@yingyeothon/actor-system" "^0.1.8"
     "@yingyeothon/logger" "^0.1.0"
   optionalDependencies:
     aws-sdk "2.437.0"
 
-"@yingyeothon/actor-system-redis-support@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@yingyeothon/actor-system-redis-support/-/actor-system-redis-support-0.1.2.tgz#42f135bfdfd53523450a6949d12ceaca7b9abb01"
-  integrity sha512-AbZHTTCHV3m8k5gK8dIaHczWIN8dv2yKq/nO53QyiQrbQhWSif0JTpYjwdxF9gAv7YP7/OMMiPhvf4g0CMDcgg==
+"@yingyeothon/actor-system-redis-support@^0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@yingyeothon/actor-system-redis-support/-/actor-system-redis-support-0.1.3.tgz#a424abd723a13280295fc91259f2c0a2244c047c"
+  integrity sha512-GFks/QoF0Orw30L3DZbOqTWx+rVtNHbmsY7BIQD8cKQxryfOBGNfpOujLmZxLBQAkRRfQjnIcOiFEpkc6jJ6yQ==
   dependencies:
-    "@yingyeothon/actor-system" "^0.1.5"
+    "@yingyeothon/actor-system" "^0.1.7"
     "@yingyeothon/codec" "^0.1.0"
     "@yingyeothon/logger" "^0.1.0"
     ioredis "^4.11.2"
 
-"@yingyeothon/actor-system@^0.1.5", "@yingyeothon/actor-system@^0.1.6":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@yingyeothon/actor-system/-/actor-system-0.1.6.tgz#e19daf77aa2d284429f920b24fe7fffc662be841"
-  integrity sha512-oMw/aDNZy6JD4vYqGQmbSPTA7XTL1zsOODLfh0GUV7NFjjyWXnQEA8sozMAYggJJH4FxuWQz4VsF0TROXFlPSQ==
+"@yingyeothon/actor-system@^0.1.7":
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/@yingyeothon/actor-system/-/actor-system-0.1.7.tgz#c508dd57cb8e0612e4f44a0006257a663341e342"
+  integrity sha512-0waKl2XMEC6nID+GMEJp6zSjw+KpdS6g3quA0XxUwCyaL3uJ7KfEF1nNyoqGGElxbUVZiiIXVATSR0Zs0hz3mA==
+  dependencies:
+    "@yingyeothon/event-broker" "^0.1.0"
+    "@yingyeothon/logger" "^0.1.0"
+
+"@yingyeothon/actor-system@^0.1.8":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@yingyeothon/actor-system/-/actor-system-0.1.8.tgz#66025cca3b75fc163000296fbf1254872597039d"
+  integrity sha512-CRZ3ki3XqKlIqxcxaZzMJyrs18LowXuzkBLT4gHgWajkrv4TrpNYWd3zZ/4/siahYlmVvHjIwJVwitA5XYNr3w==
   dependencies:
     "@yingyeothon/event-broker" "^0.1.0"
     "@yingyeothon/logger" "^0.1.0"
@@ -1454,7 +1462,7 @@ bl@^1.0.0:
     readable-stream "^2.3.5"
     safe-buffer "^5.1.1"
 
-bluebird@^3.5.4, bluebird@^3.5.5:
+bluebird@^3.4.7, bluebird@^3.5.4, bluebird@^3.5.5:
   version "3.5.5"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.5.tgz#a8d0afd73251effbbd5fe384a77d73003c17a71f"
   integrity sha512-5am6HnnfN+urzt4yfg7IgTbotDjIT/u8AJpEt0sIU9FtXfVeezXAPKswrG+xKUCOYAINpSdgZVDU6QFh+cuH3w==
@@ -3271,6 +3279,15 @@ fs-extra@^7.0.1:
   integrity sha512-YJDaCJZEnBmcbw13fvdAM9AwNOJwOzrE4pqMqBq5nFiEqXUqHwlK4B+3pUw6JNvfSPtX05xFHtYy/1ni01eGCw==
   dependencies:
     graceful-fs "^4.1.2"
+    jsonfile "^4.0.0"
+    universalify "^0.1.0"
+
+fs-extra@^8.0.1:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-8.1.0.tgz#49d43c45a88cd9677668cb7be1b46efdb8d2e1c0"
+  integrity sha512-yhlQgA6mnOJUKOsRUFsgJdQCvkKhcz8tlZG5HBQfReYZy46OwLcY+Zia0mtdHsOo9y/hP+CxMN0TU9QxoOtG4g==
+  dependencies:
+    graceful-fs "^4.2.0"
     jsonfile "^4.0.0"
     universalify "^0.1.0"
 
@@ -6707,6 +6724,20 @@ serverless-offline@^5.10.1:
     trim-newlines "^3.0.0"
     update-notifier "^3.0.1"
     velocityjs "^1.1.3"
+
+serverless-plugin-warmup@^4.7.0-rc.1:
+  version "4.7.0-rc.1"
+  resolved "https://registry.yarnpkg.com/serverless-plugin-warmup/-/serverless-plugin-warmup-4.7.0-rc.1.tgz#92682b56605118fd41dda2b8b881ca2f44ab6dcd"
+  integrity sha512-iQO7rG89JOFhCVIaveKoaFqIo29wpgUlmRK94etEqC6yr7LzBhQnPyXJGBnETAIMDG8H4GZKXSCtYCVWlN2g4Q==
+  dependencies:
+    fs-extra "^8.0.1"
+
+serverless-prune-plugin@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/serverless-prune-plugin/-/serverless-prune-plugin-1.4.0.tgz#d556dbc76c8b1f531e888acae23b1b39de903e51"
+  integrity sha512-wcg3riKzzrAWDFW7Ve30MMH9mp6T4ACaWQqVk8dX46nxMn5Dc4oLBRR/PfzrwL6uYZCUxXT6juT5G092H2cjTQ==
+  dependencies:
+    bluebird "^3.4.7"
 
 serverless-webpack@^5.3.1:
   version "5.3.1"

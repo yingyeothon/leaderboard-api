@@ -3,17 +3,15 @@ import { getRankRepository } from "../../src/rank";
 const serviceKey = `__tests__/repository`;
 
 beforeEach(async () => {
-  const repo = await getRankRepository(serviceKey);
-  await repo.truncate();
+  await getRankRepository(serviceKey).truncate();
 });
 
 afterEach(async () => {
-  const repo = await getRankRepository(serviceKey);
-  await repo.truncate();
+  await getRankRepository(serviceKey).truncate();
 });
 
 test("basic-flow", async () => {
-  const repo = await getRankRepository(serviceKey);
+  const repo = getRankRepository(serviceKey);
   repo.update(`user1`, `123456789`);
   repo.update(`user2`, `123456799`);
   repo.update(`user3`, `123456999`);
@@ -51,7 +49,7 @@ test("basic-flow", async () => {
 });
 
 test(`unexpected`, async () => {
-  const repo = await getRankRepository(serviceKey);
+  const repo = getRankRepository(serviceKey);
   expect(repo.around(`unknown`, 10)).toEqual([]);
   expect(() => repo.scroll(`unknown`, `unknown` as any, 10)).toThrow(
     `Invalid direction`

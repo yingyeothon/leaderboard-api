@@ -4,9 +4,9 @@ import {
   InMemoryQueue
 } from "@yingyeothon/actor-system";
 import { RedisLock, RedisQueue } from "@yingyeothon/actor-system-redis-support";
-// import { S3Repository } from '@yingyeothon/repository-s3';
 import { InMemoryRepository } from "@yingyeothon/repository";
-import { RedisRepository } from "@yingyeothon/repository-redis";
+import { S3Repository } from "@yingyeothon/repository-s3";
+// import { RedisRepository } from "@yingyeothon/repository-redis";
 import IORedis from "ioredis";
 import mem from "mem";
 import envars from "./envars";
@@ -38,8 +38,7 @@ export const getActorSystem = mem(() =>
 
 export const getRepository = mem(() =>
   envars.external.production
-    ? // Don't use S3 as a repository until writing all of tests for this and throttling this by API Gateway settings.
-      // new S3Repository({ bucketName: process.env.BUCKET_NAME });
-      new RedisRepository({ redis: getRedis(), prefix: "leaderboard:" })
-    : new InMemoryRepository()
+    ? new S3Repository({ bucketName: process.env.BUCKET_NAME })
+    : // ? new RedisRepository({ redis: getRedis(), prefix: "leaderboard:" })
+      new InMemoryRepository()
 );

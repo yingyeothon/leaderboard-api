@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyHandler } from "aws-lambda";
 import "source-map-support/register";
-import { requestToUpdateRank } from "./actor";
+import { requestToUpdateRank, waitMyRankUntilUpdated } from "./actor";
 import { getRankRepository, IRankRepository } from "./rank";
 import logger from "./system/logger";
 import { safeIntQueryParam, safeStringQueryParam } from "./utils/request";
@@ -41,7 +41,8 @@ const handleFetch = (
   const parameters = prepareRequest(event);
   const { serviceKey } = parameters;
   try {
-    const repository = await getRankRepository(serviceKey);
+    const repository = getRankRepository(serviceKey);
+    await repository.load();
     return {
       statusCode: 200,
       body: JSON.stringify(fetch({ ...parameters, repository }))
@@ -82,15 +83,21 @@ export const scrollDown: APIGatewayProxyHandler = handleFetch(
 );
 
 export const put: APIGatewayProxyHandler = async event => {
-  const { serviceKey, user } = prepareRequest(event);
+  if ((event as any).source === "serverless-plugin-warmup") {
+    logger.info(`Lambda is warmup.`);
+    return;
+  }
+
+  const { serviceKey, user: getUser } = prepareRequest(event);
   try {
+    const user = getUser();
     const score = (event.body || "").trim();
     logger.info(`put`, serviceKey, user, score);
 
-    const updated = await requestToUpdateRank(serviceKey, user(), score);
-    logger.info(`put`, `completion`, serviceKey, user, score, updated);
+    await requestToUpdateRank(serviceKey, user, score);
+    const myRank = await waitMyRankUntilUpdated(serviceKey, user, score);
+    logger.info(`put`, `completion`, serviceKey, user, score, myRank);
 
-    const myRank = (await getRankRepository(serviceKey)).me(user());
     return { statusCode: 200, body: JSON.stringify(myRank) };
   } catch (error) {
     logger.error(`put`, serviceKey, event.body, error);
@@ -110,7 +117,7 @@ export const clear: APIGatewayProxyHandler = async event => {
   const serviceKey = [serviceId, period].join("/");
   logger.info(`clear`, serviceKey);
   try {
-    (await getRankRepository(serviceKey)).truncate();
+    await getRankRepository(serviceKey).truncate();
     return { statusCode: 200, body: "OK" };
   } catch (error) {
     logger.error(`clear`, serviceKey, error);

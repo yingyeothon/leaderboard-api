@@ -1,5 +1,7 @@
+import mem from "mem";
 import elapsed from "../system/elapsed";
 import { getRepository } from "../system/external";
+import logger from "../system/logger";
 import { emptyDocument, IRankDocument, IRankRecord } from "./document";
 import {
   fetchMyRank,
@@ -11,9 +13,11 @@ import {
 import { insertOrUpdateRank, isHigherThanOld } from "./update";
 
 export interface IRankRepository {
-  load(): Promise<void>;
-  update(user: string, score: string): Promise<void>;
-  truncate(): Promise<void>;
+  load(): Promise<this>;
+  commit(): Promise<this>;
+  truncate(): Promise<this>;
+
+  update(user: string, score: string): void;
 
   me(user: string): IRankRecord;
   top(offset: number, limit: number): IRankRecord[];
@@ -27,23 +31,32 @@ class RankRepository implements IRankRepository {
   constructor(private readonly documentKey: string) {}
 
   public async load() {
-    const loadDocument = () =>
-      getRepository().get<IRankDocument>(this.documentKey);
+    logger.debug(`Load document with key[${this.documentKey}]`);
     this.document = ensureDocument(
-      await elapsed(`loadDocument`, loadDocument)()
+      await elapsed(`loadDocument`, () =>
+        getRepository().get<IRankDocument>(this.documentKey)
+      )()
     );
+    return this;
   }
 
-  public async update(user: string, score: string, commit: boolean = true) {
-    const saveDocument = () =>
-      getRepository().set(this.documentKey, this.document);
-    const updateRank = async () => {
+  public async commit() {
+    logger.debug(`Save document with key[${this.documentKey}]`);
+    await elapsed(`saveDocument`, () =>
+      getRepository().set(this.documentKey, this.document)
+    )();
+    return this;
+  }
+
+  public update(user: string, score: string) {
+    elapsed(`updateRank`, () => {
       this.document = insertOrUpdateRank(this.document, user, score);
-      if (commit) {
-        await elapsed(`saveDocument`, saveDocument)();
-      }
-    };
-    await elapsed(`updateRank`, updateRank)();
+    })();
+  }
+
+  public async truncate() {
+    await elapsed(`truncate`, () => getRepository().delete(this.documentKey))();
+    return this;
   }
 
   public isUpdatable(user: string, score: string) {
@@ -80,12 +93,6 @@ class RankRepository implements IRankRepository {
     }
   }
 
-  public async truncate() {
-    return elapsed(`truncate`, () =>
-      getRepository().delete(this.documentKey)
-    )();
-  }
-
   private isRanker(user: string) {
     return this.document.userIndex[user] !== undefined;
   }
@@ -93,11 +100,7 @@ class RankRepository implements IRankRepository {
 
 export const getRankRepository = elapsed(
   `getRankSystem`,
-  async (documentKey: string) => {
-    const repository = new RankRepository(documentKey);
-    await repository.load();
-    return repository;
-  }
+  mem((documentKey: string) => new RankRepository(documentKey))
 );
 
 const ensureDocument = (doc: IRankDocument): IRankDocument => {
