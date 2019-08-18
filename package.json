@@ -21,8 +21,6 @@
     "@yingyeothon/repository-s3": "^0.1.0",
     "ioredis": "^4.14.0",
     "mem": "^5.1.1",
-    "serverless-plugin-warmup": "^4.7.0-rc.1",
-    "serverless-prune-plugin": "^1.4.0",
     "source-map-support": "^0.5.10",
     "time-span": "^3.1.0"
   },
@@ -35,6 +33,8 @@
     "jest": "^24.8.0",
     "serverless": "^1.49.0",
     "serverless-offline": "^5.10.1",
+    "serverless-plugin-warmup": "^4.7.0-rc.1",
+    "serverless-prune-plugin": "^1.4.0",
     "serverless-webpack": "^5.3.1",
     "ts-jest": "^24.0.2",
     "ts-loader": "^6.0.4",
