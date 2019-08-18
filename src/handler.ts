@@ -4,6 +4,7 @@ import { requestToUpdateRank, waitMyRankUntilUpdated } from "./actor";
 import { getRankRepository, IRankRepository } from "./rank";
 import logger from "./system/logger";
 import { safeIntQueryParam, safeStringQueryParam } from "./utils/request";
+import envars from "./system/envars";
 export { bottomHalf } from "./actor";
 
 const prepareRequest = (event: APIGatewayProxyEvent) => {
@@ -111,7 +112,7 @@ export const clear: APIGatewayProxyHandler = async event => {
     return { statusCode: 404, body: "Not Found" };
   }
   const auth = event.headers["x-auth"];
-  if (!process.env.AUTH && auth !== process.env.AUTH) {
+  if (!envars.admin.authKey && auth !== envars.admin.authKey) {
     return { statusCode: 401, body: "Unauthorized" };
   }
   const serviceKey = [serviceId, period].join("/");

@@ -18,6 +18,9 @@ const envars = {
     s3: {
       bucketName: process.env.BUCKET_NAME
     }
+  },
+  actor: {
+    bottomHalf: process.env.BOTTOM_HALF_LAMBDA!
   }
 };
 

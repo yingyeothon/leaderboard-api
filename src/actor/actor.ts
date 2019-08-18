@@ -4,6 +4,7 @@ import {
 } from "@yingyeothon/actor-system-aws-lambda-support";
 import { getRankRepository, IRankRepository } from "../rank";
 import elapsed from "../system/elapsed";
+import envars from "../system/envars";
 import { getActorSystem } from "../system/external";
 import logger from "../system/logger";
 
@@ -51,10 +52,7 @@ const getRankActor = elapsed(`getRankActor`, (serviceKey: string) => {
       .on("afterAct", processor.onAfterAct)
       .on("act", processor.onMessage)
       .on("error", error => logger.error(`ActorError`, serviceKey, error))
-      .on(
-        "shift",
-        shiftToNextLambda({ functionName: process.env.BOTTOM_HALF_LAMBDA })
-      )
+      .on("shift", shiftToNextLambda({ functionName: envars.actor.bottomHalf }))
   );
 });
 

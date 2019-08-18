@@ -16,10 +16,7 @@ export const getRedis = mem(() => {
   if (!envars.external.production) {
     throw new Error(`Do not use Redis while testing.`);
   }
-  return new IORedis({
-    host: process.env.REDIS_HOST,
-    password: process.env.REDIS_PASSWORD
-  });
+  return new IORedis(envars.redis);
 });
 
 export const getActorSystem = mem(() =>
@@ -38,7 +35,7 @@ export const getActorSystem = mem(() =>
 
 export const getRepository = mem(() =>
   envars.external.production
-    ? new S3Repository({ bucketName: process.env.BUCKET_NAME })
+    ? new S3Repository({ bucketName: envars.repository.s3.bucketName })
     : // ? new RedisRepository({ redis: getRedis(), prefix: "leaderboard:" })
       new InMemoryRepository()
 );
